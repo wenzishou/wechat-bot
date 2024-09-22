@@ -15,6 +15,7 @@ const httpUrl = new URL('https://spark-api.xf-yun.com/v4.0/chat')
 
 let histArray = []
 let roleArray = []
+let timeArray = []
 
 let modelDomain = '4.0Ultra' // V1.1-V3.5动态获取，高于以上版本手动指定
 function authenticate() {
@@ -60,6 +61,7 @@ export async function xunfeiSendMsg(inputVal) {
   let total_res = '' // 请空回答历史
 
   console.log('inputVal:', inputVal)
+  let timestamp = new Date().getTime() / 1000
   // 创建一个Promise
   let messagePromise = new Promise((resolve, reject) => {
     // 监听websocket的各阶段事件 并做相应处理
@@ -68,6 +70,7 @@ export async function xunfeiSendMsg(inputVal) {
       // 发送消息
       histArray.push(inputVal)
       roleArray.push('user')
+      timeArray.push(timestamp)
       let totalLength = histArray.reduce((sum, currentString) => sum + currentString.length, 0)
 
       while (totalLength + inputVal.length > 4096) {
@@ -77,6 +80,11 @@ export async function xunfeiSendMsg(inputVal) {
         roleArray.shift()
         totalLength = histArray.reduce((sum, currentString) => sum + currentString.length, 0)
         //sendString = sendString.slice(-2048)
+      }
+      while (timestamp - timeArray[0] > 3600 * 2 ) {
+        histArray.shift()
+        roleArray.shift()
+        timeArray.shift()
       }
       let sendArray = []
       histArray.forEach((value, index) => {
@@ -145,6 +153,7 @@ export async function xunfeiSendMsg(inputVal) {
       resolve(total_res)
       histArray.push(total_res)
       roleArray.push('assistant')
+      timeArray.push(timestamp)
     })
 
     socket.addEventListener('error', (event) => {
