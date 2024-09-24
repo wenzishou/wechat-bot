@@ -81,10 +81,12 @@ export async function xunfeiSendMsg(inputVal) {
         totalLength = histArray.reduce((sum, currentString) => sum + currentString.length, 0)
         //sendString = sendString.slice(-2048)
       }
-      while (timestamp - timeArray[0] > 3600 * 2 ) {
+      let firstTime = timeArray[0]
+      while (timestamp - firstTime > 3600 * 2 ) {
         histArray.shift()
         roleArray.shift()
         timeArray.shift()
+        firstTime = timeArray[0]
       }
       let sendArray = []
       histArray.forEach((value, index) => {
